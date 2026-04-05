@@ -441,27 +441,12 @@
 
     // --- Data Fetching ---
 
-    const API_URL = 'https://www.dira.moch.gov.il/api/Invoker?method=Projects&param=%3FfirstApplicantIdentityNumber%3D%26secondApplicantIdentityNumber%3D%26ProjectStatus%3D4%26Entitlement%3D1%26PageNumber%3D1%26PageSize%3D100%26IsInit%3Dtrue%26';
-
-    const FETCH_METHODS = [
-      // Direct (works if same-origin or CORS allowed)
-      url => fetch(url),
-      // api.codetabs.com proxy
-      url => fetch('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url)),
-    ];
-
     async function fetchData() {
-      for (const method of FETCH_METHODS) {
-        try {
-          const res = await method(API_URL);
-          if (!res.ok) continue;
-          const data = await res.json();
-          if (data.ProjectItems) return data;
-        } catch (e) {
-          continue;
-        }
-      }
-      throw new Error('לא ניתן לטעון את נתוני ההגרלות. ייתכן שה-API אינו זמין כרגע.');
+      const res = await fetch('data.json');
+      if (!res.ok) throw new Error('לא ניתן לטעון את נתוני ההגרלות.');
+      const data = await res.json();
+      if (!data.ProjectItems) throw new Error('לא ניתן לטעון את נתוני ההגרלות. תגובה לא תקינה.');
+      return data;
     }
 
     // --- Lottery Calculation ---
