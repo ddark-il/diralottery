@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מחשבון סיכויים - דירה בהנחה</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, 'Segoe UI', Tahoma, sans-serif;
+      background: #f6f6f6;
+      color: #022640;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* --- Header --- */
+    .site-header {
+      background: #004b8f;
+      padding: 0 20px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .site-header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    /* --- Sub-header --- */
+    .sub-header {
+      background: #bfd0e0;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 600;
+      color: #004b8f;
+    }
+
+    /* --- Container --- */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 20px 15px;
+    }
+
+    /* --- Banner --- */
+    .banner {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      color: #664d03;
+      padding: 12px 15px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+
+    /* --- Section box --- */
+    .section-box {
+      background: #fff;
+      margin-bottom: 15px;
+      border-top: 3px solid #004b8f;
+    }
+
+    .section-header {
+      background: #004b8f;
+      color: #fff;
+      padding: 10px 20px;
+      font-size: 17px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-header .step-num {
+      background: #fff;
+      color: #004b8f;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .section-body {
+      padding: 15px 20px;
+    }
+
+    /* --- Category --- */
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 8px;
+    }
+
+    .category-option { position: relative; }
+
+    .category-option input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .category-option label {
+      display: block;
+      padding: 10px 14px;
+      border: 2px solid #dce4ec;
+      background: #f6f6f6;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .category-option input:checked + label {
+      border-color: #004b8f;
+      background: #d5eaf7;
+      font-weight: 700;
+      color: #004b8f;
+    }
+
+    .category-option label:hover {
+      border-color: #004b8f;
+      background: #eaf2f9;
+    }
+
+    /* --- City search --- */
+    .city-search {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #a9bed1;
+      font-size: 14px;
+      margin-bottom: 8px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .city-search:focus {
+      border-color: #004b8f;
+    }
+
+    .selected-count {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+
+    .city-list {
+      max-height: 280px;
+      overflow-y: auto;
+      border: 1px solid #dce4ec;
+    }
+
+    .city-item {
+      padding: 8px 14px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.1s;
+    }
+
+    .city-item:last-child { border-bottom: none; }
+    .city-item:hover { background: #eaf2f9; }
+
+    .city-item.selected {
+      background: #d5eaf7;
+      font-weight: 700;
+      color: #004b8f;
+    }
+
+    .city-item.disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .city-item .project-count {
+      font-size: 12px;
+      color: #888;
+      background: #f6f6f6;
+      padding: 2px 8px;
+    }
+
+    /* --- Button --- */
+    .btn {
+      background: #057e3b;
+      color: #fff;
+      border: none;
+      padding: 12px 30px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      display: block;
+      width: 100%;
+    }
+
+    .btn:hover { background: #04582a; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* --- Results table --- */
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .results-table th {
+      background: #4c7fc1;
+      color: #fff;
+      padding: 10px 8px;
+      text-align: right;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .results-table td {
+      background: #f7f7f7;
+      color: #022640;
+      padding: 8px;
+      text-align: right;
+      border-top: 3px solid #fff;
+      font-size: 14px;
+    }
+
+    .chance-cell {
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .chance-high { color: #057e3b; }
+    .chance-low { color: #c30e27; }
+
+    /* --- City summary --- */
+    .city-summary {
+      margin-top: 0;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+    }
+
+    .city-summary.good {
+      background: #e8f5e9;
+      border-top: 2px solid #057e3b;
+    }
+
+    .city-summary.ok {
+      background: #fff8e1;
+      border-top: 2px solid #ffc107;
+    }
+
+    .city-chance {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    /* --- Overall --- */
+    .overall-summary {
+      text-align: center;
+      padding: 25px 20px;
+    }
+
+    .overall-label {
+      color: #004b8f;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .overall-chance {
+      font-size: 48px;
+      font-weight: 800;
+      color: #004b8f;
+    }
+
+    /* --- Loading / Error --- */
+    .loading {
+      text-align: center;
+      padding: 50px;
+      color: #666;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 36px;
+      height: 36px;
+      border: 3px solid #dce4ec;
+      border-top-color: #004b8f;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 10px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error {
+      background: #fdecea;
+      border: 1px solid #f5c6cb;
+      color: #c30e27;
+      padding: 15px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .hidden { display: none; }
+
+    /* --- Results city header --- */
+    .result-city-header {
+      background: #004b8f;
+      color: #fff;
+      padding: 10px 20px;
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    /* --- Footer --- */
+    .site-footer {
+      background: #022640;
+      color: #a9bed1;
+      text-align: center;
+      padding: 15px;
+      font-size: 12px;
+      margin-top: 30px;
+    }
+
+    .site-footer a {
+      color: #d5eaf7;
+      text-decoration: underline;
+    }
+
+    @media (max-width: 500px) {
+      .category-grid { grid-template-columns: 1fr 1fr; }
+      .site-header h1 { font-size: 20px; }
+      .overall-chance { font-size: 36px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <h1>מחשבון סיכויים - דירה בהנחה</h1>
+  </header>
+
+  <div class="sub-header">חשב את סיכויי הזכייה בהגרלת מחיר למשתכן</div>
+
+  <div class="container">
+
+    <div id="noOpenBanner" class="banner hidden">
+      אין כרגע הגרלות פתוחות להרשמה. מוצגים נתוני ההגרלות האחרונות לצורך התמצאות.
+    </div>
+
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <div>טוען נתוני הגרלות...</div>
+    </div>
+
+    <div id="error" class="error hidden"></div>
+
+    <div id="app" class="hidden">
+
+      <!-- Step 1: Category -->
+      <div class="section-box">
+        <div class="section-header">
+          <span class="step-num">1</span>
+          בחר קטגוריה
+        </div>
+        <div class="section-body">
+          <div class="category-grid">
+            <div class="category-option">
+              <input type="radio" name="category" id="cat-disabled" value="disabled">
+              <label for="cat-disabled">בעל מוגבלות</label>
+            </div>
+            <div class="category-option">
+              <input type="radio" name="category" id="cat-combat" value="combat">
+              <label for="cat-combat">משרת מילואים לוחם</label>
+            </div>
+            <div class="category-option">
+              <input type="radio" name="category" id="cat-noncombat" value="noncombat">
+              <label for="cat-noncombat">משרת מילואים לא לוחם</label>
+            </div>
+            <div class="category-option">
+              <input type="radio" name="category" id="cat-local" value="local">
+              <label for="cat-local">תושב מקומי</label>
+            </div>
+            <div class="category-option">
+              <input type="radio" name="category" id="cat-general" value="general" checked>
+              <label for="cat-general">ציבור כללי</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Cities -->
+      <div class="section-box">
+        <div class="section-header">
+          <span class="step-num">2</span>
+          בחר עד 3 ערים
+        </div>
+        <div class="section-body">
+          <input type="text" class="city-search" id="citySearch" placeholder="חפש עיר...">
+          <div class="selected-count" id="selectedCount">נבחרו 0 מתוך 3</div>
+          <div class="city-list" id="cityList"></div>
+        </div>
+      </div>
+
+      <!-- Step 3: Calculate -->
+      <div class="section-box">
+        <button class="btn" id="calcBtn" disabled>חשב את הסיכויים שלי</button>
+      </div>
+
+      <!-- Results -->
+      <div id="results" class="hidden"></div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    הנתונים מבוססים על ממשק ה-API של אתר דירה בהנחה. החישוב מבוסס על הערכות ואינו מהווה נתון רשמי.
+  </footer>
+
+  <script>
+    let projectData = [];
+    let citiesMap = {};
+    let selectedCities = new Set();
+
+    // --- Data Fetching ---
+
+    const API_URL = 'https://www.dira.moch.gov.il/api/Invoker?method=Projects&param=%3FfirstApplicantIdentityNumber%3D%26secondApplicantIdentityNumber%3D%26ProjectStatus%3D4%26Entitlement%3D1%26PageNumber%3D1%26PageSize%3D100%26IsInit%3Dtrue%26';
+
+    const FETCH_METHODS = [
+      // Direct (works if same-origin or CORS allowed)
+      url => fetch(url),
+      // api.codetabs.com proxy
+      url => fetch('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url)),
+    ];
+
+    async function fetchData() {
+      for (const method of FETCH_METHODS) {
+        try {
+          const res = await method(API_URL);
+          if (!res.ok) continue;
+          const data = await res.json();
+          if (data.ProjectItems) return data;
+        } catch (e) {
+          continue;
+        }
+      }
+      throw new Error('לא ניתן לטעון את נתוני ההגרלות. ייתכן שה-API אינו זמין כרגע.');
+    }
+
+    // --- Lottery Calculation ---
+
+    function calculateChances(project, category) {
+      const totalSubs = project.TotalSubscribers;
+      const disabledSubs = project.TotalHandicappedSubscribers;
+      const localSubs = project.TotalLocalSubscribers;
+      const nonPrioritySubs = totalSubs - disabledSubs - localSubs;
+
+      const combatSubs = nonPrioritySubs * 0.25;
+      const nonCombatSubs = nonPrioritySubs * 0.25;
+      const generalPublicSubs = nonPrioritySubs * 0.50;
+
+      let remaining = project.TargetHousingUnits;
+
+      // Stage 1: Disabled
+      const disabledPool = disabledSubs;
+      const chanceDisabled = disabledPool > 0 ? project.HousingUnitsForHandicapped / disabledPool : 0;
+      const winnersDisabled = Math.min(disabledPool, project.HousingUnitsForHandicapped);
+      remaining -= winnersDisabled;
+      const rolloverDisabled = disabledPool - winnersDisabled;
+
+      // Stage 2: Combat Reservists
+      const chanceCombat = combatSubs > 0 ? project.HU_CombatReservist_L / combatSubs : 0;
+      const winnersCombat = Math.min(combatSubs, project.HU_CombatReservist_L);
+      remaining -= winnersCombat;
+      const rolloverCombat = combatSubs - winnersCombat;
+
+      // Stage 3: Non-Combat Reservists
+      const aptsNonCombat = project.HU_Reservists_L - project.HU_CombatReservist_L;
+      const nonCombatPool = nonCombatSubs + rolloverCombat;
+      const chanceNonCombat = nonCombatPool > 0 ? aptsNonCombat / nonCombatPool : 0;
+      const winnersNonCombat = Math.min(nonCombatPool, aptsNonCombat);
+      remaining -= winnersNonCombat;
+      const rolloverReservists = nonCombatPool - winnersNonCombat;
+
+      // Stage 4: General Public
+      const generalPool = generalPublicSubs + rolloverDisabled + rolloverReservists + localSubs;
+      const chanceGeneral = generalPool > 0 ? remaining / generalPool : 0;
+
+      switch (category) {
+        case 'disabled':
+          return Math.min(1, chanceDisabled + (1 - chanceDisabled) * chanceGeneral);
+        case 'combat':
+          return Math.min(1, chanceCombat + (1 - chanceCombat) * chanceNonCombat + (1 - chanceCombat) * (1 - chanceNonCombat) * chanceGeneral);
+        case 'noncombat':
+          return Math.min(1, chanceNonCombat + (1 - chanceNonCombat) * chanceGeneral);
+        case 'local':
+          return Math.min(1, chanceGeneral);
+        case 'general':
+          return Math.min(1, chanceGeneral);
+        default:
+          return 0;
+      }
+    }
+
+    // --- UI Logic ---
+
+    function buildCityList(projects) {
+      citiesMap = {};
+      for (const p of projects) {
+        const code = p.CityCode;
+        if (!citiesMap[code]) {
+          citiesMap[code] = { name: p.CityDescription, code, projects: [] };
+        }
+        citiesMap[code].projects.push(p);
+      }
+    }
+
+    function renderCities(filter = '') {
+      const list = document.getElementById('cityList');
+      list.innerHTML = '';
+      const filterLower = filter.toLowerCase();
+
+      const sorted = Object.values(citiesMap).sort((a, b) => a.name.localeCompare(b.name, 'he'));
+
+      for (const city of sorted) {
+        if (filter && !city.name.toLowerCase().includes(filterLower) && !String(city.code).includes(filterLower)) {
+          continue;
+        }
+        const div = document.createElement('div');
+        div.className = 'city-item';
+        if (selectedCities.has(city.code)) div.classList.add('selected');
+        if (selectedCities.size >= 3 && !selectedCities.has(city.code)) div.classList.add('disabled');
+
+        const projectWord = city.projects.length === 1 ? 'פרויקט' : 'פרויקטים';
+        div.innerHTML = `
+          <span>${city.name}</span>
+          <span class="project-count">${city.projects.length} ${projectWord}</span>
+        `;
+
+        div.addEventListener('click', () => {
+          if (selectedCities.has(city.code)) {
+            selectedCities.delete(city.code);
+          } else if (selectedCities.size < 3) {
+            selectedCities.add(city.code);
+          }
+          renderCities(document.getElementById('citySearch').value);
+          updateCalcButton();
+        });
+
+        list.appendChild(div);
+      }
+
+      document.getElementById('selectedCount').textContent = `נבחרו ${selectedCities.size} מתוך 3`;
+    }
+
+    function updateCalcButton() {
+      document.getElementById('calcBtn').disabled = selectedCities.size === 0;
+    }
+
+    function getCategory() {
+      return document.querySelector('input[name="category"]:checked').value;
+    }
+
+    function formatPercent(n) {
+      if (n >= 0.01) return (n * 100).toFixed(2) + '%';
+      if (n >= 0.001) return (n * 100).toFixed(3) + '%';
+      return (n * 100).toFixed(4) + '%';
+    }
+
+    function formatPrice(price) {
+      return new Intl.NumberFormat('he-IL', { style: 'currency', currency: 'ILS', maximumFractionDigits: 0 }).format(price);
+    }
+
+    function calculate() {
+      const category = getCategory();
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.classList.remove('hidden');
+
+      let overallNoWin = 1;
+      let html = '';
+
+      for (const cityCode of selectedCities) {
+        const city = citiesMap[cityCode];
+        let cityNoWin = 1;
+
+        let rows = '';
+        for (const project of city.projects) {
+          const chance = calculateChances(project, category);
+          cityNoWin *= (1 - chance);
+          overallNoWin *= (1 - chance);
+
+          const chanceClass = chance >= 0.05 ? 'chance-high' : 'chance-low';
+          rows += `
+            <tr>
+              <td>${project.LotteryNumber}</td>
+              <td>${project.ProjectName}</td>
+              <td>${project.TargetHousingUnits}</td>
+              <td>${project.TotalSubscribers.toLocaleString('he-IL')}</td>
+              <td>${formatPrice(project.PricePerUnit * 100)}</td>
+              <td class="chance-cell ${chanceClass}">${formatPercent(chance)}</td>
+            </tr>
+          `;
+        }
+
+        const cityChance = 1 - cityNoWin;
+        const summaryClass = cityChance >= 0.05 ? 'good' : 'ok';
+        const chanceColorClass = cityChance >= 0.05 ? 'chance-high' : 'chance-low';
+
+        html += `
+          <div class="section-box">
+            <div class="result-city-header">${city.name}</div>
+            <table class="results-table">
+              <thead>
+                <tr>
+                  <th>הגרלה</th>
+                  <th>פרויקט</th>
+                  <th>דירות</th>
+                  <th>נרשמים</th>
+                  <th>מחיר</th>
+                  <th>סיכוי</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+            <div class="city-summary ${summaryClass}">
+              <span>סיכוי משולב ב${city.name}</span>
+              <span class="city-chance ${chanceColorClass}">${formatPercent(cityChance)}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      const overallChance = 1 - overallNoWin;
+
+      html += `
+        <div class="section-box overall-summary">
+          <div class="overall-label">סיכוי כולל לזכייה לפחות בהגרלה אחת</div>
+          <div class="overall-chance">${formatPercent(overallChance)}</div>
+        </div>
+      `;
+
+      resultsDiv.innerHTML = html;
+      resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // --- Init ---
+
+    async function init() {
+      try {
+        const data = await fetchData();
+        projectData = data.ProjectItems;
+        buildCityList(projectData);
+
+        if (projectData.length > 0 && projectData[0].OpenLotteriesCount === 0) {
+          document.getElementById('noOpenBanner').classList.remove('hidden');
+        }
+
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('app').classList.remove('hidden');
+
+        renderCities();
+
+        document.getElementById('citySearch').addEventListener('input', e => {
+          renderCities(e.target.value);
+        });
+
+        document.getElementById('calcBtn').addEventListener('click', calculate);
+      } catch (e) {
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('error').classList.remove('hidden');
+        document.getElementById('error').textContent = e.message;
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
