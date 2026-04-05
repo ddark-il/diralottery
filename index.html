@@ -598,6 +598,7 @@
               <td>${project.ProjectName}</td>
               <td>${project.TargetHousingUnits}</td>
               <td>${project.TotalSubscribers.toLocaleString('he-IL')}</td>
+              <td>${formatPrice(project.PricePerUnit)}</td>
               <td>${formatPrice(project.PricePerUnit * 100)}</td>
               <td class="chance-cell ${chanceClass}">${formatPercent(chance)}</td>
             </tr>
@@ -618,7 +619,8 @@
                   <th>פרויקט</th>
                   <th>דירות</th>
                   <th>נרשמים</th>
-                  <th>מחיר</th>
+                  <th>מחיר למ"ר</th>
+                  <th>מחיר ל-100 מ"ר</th>
                   <th>סיכוי</th>
                 </tr>
               </thead>
